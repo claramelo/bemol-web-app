@@ -6,7 +6,7 @@ HOSTS_IP=$3
 DOCKER_IMAGE=$4
 
 if [[ $MODE == 'create-cluster' ]]; then
-  SCRIPT="docker pull $DOCKER_IMAGE; docker run --rm $DOCKER_IMAGE ./remote-exec create-cluster ${HOSTS_IP};"
+  SCRIPT="docker pull $DOCKER_IMAGE; docker run --rm $DOCKER_IMAGE ./remote-exec create-cluster ${HOSTS_IP};  docker system prune --all --force;"
   
   ssh -o StrictHostKeyChecking=no "${USERNAME}@${SWARM_DEPLOY_IP}" "${SCRIPT}"
 fi
@@ -16,7 +16,7 @@ if [[ $MODE == 'deploy' ]]; then
   REPO_OWNER=$6
   REPO_NAME=$7
 
-  SCRIPT="docker pull $DOCKER_IMAGE; docker run --rm $DOCKER_IMAGE ./remote-exec deploy ${HOSTS_IP} ${GITHUB_TOKEN} ${REPO_OWNER} ${REPO_NAME};"
+  SCRIPT="docker pull $DOCKER_IMAGE; docker run --rm $DOCKER_IMAGE ./remote-exec deploy ${HOSTS_IP} ${GITHUB_TOKEN} ${REPO_OWNER} ${REPO_NAME}; docker system prune --all --force;"
 
   ssh -o StrictHostKeyChecking=no "${USERNAME}@${SWARM_DEPLOY_IP}" "${SCRIPT}"
 fi
