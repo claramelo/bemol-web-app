@@ -8,5 +8,5 @@ Para garantir mais segurança foram criados security-groups que delimitam o aces
 
 A imagem abaixo ilustra o funcionamento da arquitetura proposta:
 
-![Arquitetura](/docs/mapeamento-arquitetura.png)
+![Arquitetura](/docs/mapeamento-arq.png)
 
