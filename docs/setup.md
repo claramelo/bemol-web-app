@@ -9,6 +9,8 @@ Após criar sua conta acesse o [IAM](https://console.aws.amazon.com/iam/home?#/u
 não precisa ter acesso ao console e precisa possuar a permissão de Administrador, procure por 'AdministratorAccess' na etapa de atribuição de permissões. Ao final do
 cadastro salve o arquivo .csv que contém as seguintes crendenciais `AWS_ACCESS_KEY_ID` e `AWS_SECRET_ACCESS_KEY`.
 
+Acesse o [S3](https://s3.console.aws.amazon.com/s3/home?region=us-east-1#) e crie um bucket chamado `bemol-infrastructure`, este bucket guardará o arquivo de estado do terraform.
+
 ## Configurando o [DockerHub](https://hub.docker.com/)
 
 Apenas crie uma conta na plataforma e salve o seu usuário e senha.
@@ -38,4 +40,4 @@ Após ter feitos essas mudanças, acesse o CircleCi na aba de projetos e configu
 provisionar a infraestrutura da aplicação, basta clicar em `Setup project`, depois em `Use exiting config` e por último clique em `Start building`. Após as imagens swarm-cluster-provider e provision-infra serem adicionadas ao Dockerhub, realize o mesmo processo para
 o projeto bemol-web-app. Acompanhe a execução dos jobs pelo painel do CircleCi, o último passo do CI desse projeto é o deploy.
 
-Quando o deploy estiver concluído acesse o apainel de EC2 da aws e acesse o ip publico das máquinas com o prefixo bemol-swarm-worker na porta 8080
+Quando o deploy estiver concluído acesse o apainel de EC2 da aws, na região da virginia `us-east-1`, e acesse o ip publico das máquinas com o prefixo bemol-swarm-worker na porta 8080
