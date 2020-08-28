@@ -55,7 +55,7 @@ jobs:
       - run:
           name: Push da imagem da aplicação
           command: |
-            docker push "${DOCKER_USER}/web-api:latest"
+            docker push "${DOCKER_USER}/web-app:latest"
   
   deploy:
     executor: linux-machine
