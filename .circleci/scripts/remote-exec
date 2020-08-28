@@ -1,0 +1,22 @@
+#!/bin/bash
+USERNAME="ec2-user"
+MODE=$1
+SWARM_DEPLOY_IP=$2
+HOSTS_IP=$3
+DOCKER_IMAGE=$4
+
+if [[ $MODE == 'create-cluster' ]]; then
+  SCRIPT="docker pull $DOCKER_IMAGE; docker run --rm $DOCKER_IMAGE ./remote-exec create-cluster ${HOSTS_IP};"
+  
+  ssh -o StrictHostKeyChecking=no "${USERNAME}@${SWARM_DEPLOY_IP}" "${SCRIPT}"
+fi
+
+if [[ $MODE == 'deploy' ]]; then
+  GITHUB_TOKEN=$5
+  REPO_OWNER=$6
+  REPO_NAME=$7
+
+  SCRIPT="docker pull $DOCKER_IMAGE; docker run --rm $DOCKER_IMAGE ./remote-exec deploy ${HOSTS_IP} ${GITHUB_TOKEN} ${REPO_OWNER} ${REPO_NAME};"
+
+  ssh -o StrictHostKeyChecking=no "${USERNAME}@${SWARM_DEPLOY_IP}" "${SCRIPT}"
+fi

@@ -1,0 +1,111 @@
+version: 2.1
+
+executors:
+  linux-machine:
+    machine: true
+
+jobs:
+  provision-infra:
+    executor: linux-machine
+    steps:
+      - checkout
+      - run:
+          name: Docker Login
+          command: |
+            echo "$DOCKER_PASS" | docker login --username $DOCKER_USER --password-stdin
+      - run:
+          name: Provisiona a infraestrutura a aplicação
+          command: |
+            docker pull ${DOCKER_USER}/provision-infra:latest
+            docker run mclaramelo/provision-infra:latest provision-infra
+
+  provision-swarm-cluster:
+    executor: linux-machine
+    steps:
+      - checkout
+      - run:
+          name: Docker Login
+          command: |
+            echo "$DOCKER_PASS" | docker login --username $DOCKER_USER --password-stdin
+
+      - run:
+          name: Cria cluster
+          command: |
+            export SWARM_DEPLOY_IP=$(docker run mclaramelo/provision-infra:latest deploy-swarm-ip)
+            export ANSIBLE_HOST_FILE=$(docker run mclaramelo/provision-infra:latest get-hosts-file)
+            cd .circleci/scripts
+            chmod u+x remote-exec
+            ./remote-exec create-cluster $SWARM_DEPLOY_IP  $ANSIBLE_HOST_FILE "${DOCKER_USER}/swarm-cluster-provider:latest"
+
+  build-application:
+    executor: linux-machine
+    steps:
+      - checkout
+      - run:
+          name: Docker Login
+          command: |
+            echo "$DOCKER_PASS" | docker login --username $DOCKER_USER --password-stdin
+      
+      - run:
+          name: Build imagem da aplicação
+          command: |
+            docker build . --file Dockerfile \
+                           --tag  "${DOCKER_USER}/web-app:latest"
+
+      - run:
+          name: Push da imagem da aplicação
+          command: |
+            docker push "${DOCKER_USER}/web-api:latest"
+  
+  deploy:
+    executor: linux-machine
+    steps:
+      - checkout
+      - run:
+          name: Docker Login
+          command: |
+            echo "$DOCKER_PASS" | docker login --username $DOCKER_USER --password-stdin
+      - run:
+          name: Executa o deploy da aplicação
+          command: |
+            export SWARM_DEPLOY_IP=$(docker run mclaramelo/provision-infra:latest deploy-swarm-ip)
+            export ANSIBLE_HOST_FILE=$(docker run mclaramelo/provision-infra:latest get-hosts-file)
+            cd .circleci/scripts
+            chmod u+x remote-exec
+            ./remote-exec deploy $SWARM_DEPLOY_IP $ANSIBLE_HOST_FILE "${DOCKER_USER}/swarm-cluster-provider:latest" ${GITHUB_TOKEN} ${REPO_OWNER} ${CIRCLE_PROJECT_REPONAME}
+
+
+workflows:
+  version: 2
+  bemol-workflow:
+    jobs:
+      - build-application:
+          context: common-credentials
+          filters:
+            branches:
+              only:
+                - master
+      - provision-infra:
+          context: common-credentials
+          requires:
+            - build-application
+          filters:
+              branches:
+                only:
+                - master
+      - provision-swarm-cluster:
+          context: common-credentials
+          requires:
+            - provision-infra
+          filters:
+              branches:
+                only:
+                  - master
+      - deploy:
+          context: common-credentials
+          requires:
+            - provision-swarm-cluster
+          filters:
+            branches:
+              only:
+                - master
