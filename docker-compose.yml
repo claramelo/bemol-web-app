@@ -1,0 +1,16 @@
+---
+version: '3.6'
+services:
+  web_api:
+    build: .
+    container_name: bemol_web_app
+    image: mclaramelo/web-app
+    networks:
+      - bemol
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/app
+networks:
+  bemol:
+    name: bemol

@@ -1,0 +1,33 @@
+---
+version: '3.6'
+services:
+  web_api:
+    image: mclaramelo/web-app:latest
+    labels:
+      project_name: web-app
+      project_environment: production
+    networks:
+      - bemol
+    ports:
+      - "8080:80"
+    deploy:
+      mode: replicated
+      placement:
+        constraints: [node.role == worker]
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      update_config:
+        parallelism: 3
+        delay: 10s
+        failure_action: continue
+        monitor: 10s
+        max_failure_ratio: 0.3
+        order: start-first
+
+networks:
+  bemol:
+    name: bemol
